@@ -1,7 +1,12 @@
 from typing import Union
 
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from pymongo import MongoClient
 from fastapi import FastAPI
+from pydantic import BaseModel
+from bson import json_util
+import json
 
 app = FastAPI()
 
@@ -10,28 +15,50 @@ client = MongoClient(mongourl)
 db = client.AutoProducts
 collection = db.AutoProducts
 
+'''
+{
+    "Product ID": "AUTO029",
+    "Name": "Transmission Fluid",
+    "Unit Price": 821.43,
+    "Stock Quantity": 54,
+    "Description": "High-quality Transmission Fluid designed for durability and performance."
+  },
+'''
+
+
+class AutoProduct(BaseModel):
+    product_id: int
+    name: str
+    unit_price: float
+    stock_quantity: int 
+    description: str
+
+    def toString(self):
+        s = "{ " + self.product_id + ", " + self.name + ", " + self.unit_price + ", " + self.stock_quantity + ", " + self.description + " }"
+        return s
+
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
-
 @app.get("/getSingleProduct/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
+def get_single_product(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 
 @app.get("/getAll")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+def get_all_products():
+    
+    ys = collection.find({})
+    x = json.loads(json_util.dumps(list(ys), indent=4))
 
-
+    return x
+ 
 @app.get("/addNew")
 def add_new_item(product_id: str, name: str, unit_price :float, stock_quantity :int, description :str  ):
+
     x = {    "product_id"        : product_id 
          ,   "name"              : name
          ,   "unit_price"        : unit_price
@@ -44,7 +71,7 @@ def add_new_item(product_id: str, name: str, unit_price :float, stock_quantity :
     return {"Message": y}
 
 @app.get("/deleteOne")
-def add_new_item(product_id: str ):
+def delete_one_item(product_id: str ):
     x = {    "product_id"        : product_id 
         }
     
@@ -54,46 +81,65 @@ def add_new_item(product_id: str ):
 
 
 
-@app.get("/startsWith")
+@app.get("/startsWith/{query__all_startingwith}")
 def starts_with(query__all_startingwith: str ):
     
-    q = { "name": { "$regex": query__all_startingwith + "\w+" }} 
-    y = collection.find(q)
-    
-    return {"Message": y}
+    q = { "name": { "$regex": query__all_startingwith + "\\w+" }} 
+    ys = collection.find(q)
+    x = json.loads(json_util.dumps(list(ys), indent=4))
+
+    return x
 
 @app.get("/paginate/{page_number}")
-def starts_with(product_id_start: str, product_id_end :str ):
+def paginate(page_number :int ):
     
-    start = int(product_id_start.removeprefix("AUTO"))
-    end = int(product_id_end.removeprefix("AUTO"))
+    y = collection.count_documents({})
+
+    item_index_min = (page_number - 1) * 10
+    x = y - item_index_min 
+    item_index_max = (page_number) * 10 if x >= 10  else item_index_min + x
+
+    start = item_index_min
+    end = item_index_max
     
     q = {
-            "$exp" : {
-                "$let" : {
-                    "vars" : { 
-                        "product_id_number_int" : 
-                            "{ $convert: "
-                                "{ input: "
-                                    "\"$ltrim(this.product_id, \"AUTO\")\", "
-                                    "to: \"int\" "
-                                "}"
-                            " }"
-                    } 
-                },
-                "in" : {
-                    "$and" : {
-                        "$lte" : ["product_id_number_int", end],
-                        "$gte" : ["product_id_number_int", start]
+        "$expr": {
+            "$let": {
+                "vars": {
+                    "product_id_number_int": {
+                        "$convert": {
+                            "input": { "$substr": ["$product_id", 4, -1] },
+                            "to": "int",
+                            "onError": 0,
+                            "onNull": 0
+                        }
                     }
+                },
+                "in": {
+                    "$and": [
+                        { "$lte": ["$$product_id_number_int", end] },
+                        { "$gte": ["$$product_id_number_int", start] }
+                    ]
                 }
             }
         }
+    }
                
      
-    y = collection.find(q)
+    ys = collection.find(q)
     
-    return {"Message": y}
+    x = json.loads(json_util.dumps(list(ys), indent=4))
+
+    return x
+
+@app.get("/convert/{product_id}")
+def convert_dollar_to_euro(product_id :str ):
+
+    x = collection.find_one({"product_id" : product_id })
+    price = x["unit_price"]
+    euro = price *  0.9234
+    return euro
+ 
 
 '''
  {
@@ -121,5 +167,29 @@ product ID to end from. The products should be returned in a batch of
 Implement a URL titled /convert which takes in the ID number of a 
 product and returns the price in euro. An online API should be used to 
 get the current exchange rate.
+
+
+q = {
+            "$exp" : {
+                "$let" : {
+                    "vars" : { 
+                        "product_id_number_int" : 
+                            "{ $convert: "
+                                "{ input: "
+                                    "\"$ltrim(this.product_id, \"AUTO\")\", "
+                                    "to: \"int\" "
+                                "}"
+                            " }"
+                    } 
+                },
+                "in" : {
+                    "$and" : {
+                        "$lte" : ["product_id_number_int", end],
+                        "$gte" : ["product_id_number_int", start]
+                    }
+                }
+            }
+        }
+    
 
 '''
