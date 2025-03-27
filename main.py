@@ -27,7 +27,8 @@ collection = db.AutoProducts
 
 
 class AutoProduct(BaseModel):
-    product_id: int
+    #_id :dict[str, str]
+    product_id: str
     name: str
     unit_price: float
     stock_quantity: int 
@@ -44,9 +45,11 @@ def read_root():
 
 
 @app.get("/getSingleProduct/{item_id}")
-def get_single_product(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+def get_single_product(item_id: str):
+    ys = collection.find_one({"product_id" : item_id})
+    x = json.loads(json_util.dumps((ys), indent=4))
 
+    return x
 
 @app.get("/getAll")
 def get_all_products():
@@ -56,19 +59,21 @@ def get_all_products():
 
     return x
  
-@app.get("/addNew")
-def add_new_item(product_id: str, name: str, unit_price :float, stock_quantity :int, description :str  ):
+@app.post("/addNew")
+def add_new_item(new_product :AutoProduct ):
 
-    x = {    "product_id"        : product_id 
-         ,   "name"              : name
-         ,   "unit_price"        : unit_price
-         ,   "stock_quantity"    : stock_quantity 
-         ,   "description"       : description  
+    x = {    "product_id"        : new_product.product_id 
+         ,   "name"              : new_product.name
+         ,   "unit_price"        : new_product.unit_price
+         ,   "stock_quantity"    : new_product.stock_quantity 
+         ,   "description"       : new_product.description  
         }
     
     y = collection.insert_one(x)
     
-    return {"Message": y}
+    x1 = json.loads(json_util.dumps(y), indent=4)
+
+    return x1 
 
 @app.get("/deleteOne")
 def delete_one_item(product_id: str ):
