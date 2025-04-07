@@ -3,9 +3,9 @@ from typing import Union
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient
-from fastapi import FastAPI
+from fastapi import FastAPI, requests
 from pydantic import BaseModel
-from bson import json_util
+from bson import ObjectId, json_util
 import json
 
 app = FastAPI()
@@ -27,7 +27,7 @@ collection = db.AutoProducts
 
 
 class AutoProduct(BaseModel):
-    #_id :dict[str, str]
+    _id :dict[str, str]
     product_id: str
     name: str
     unit_price: float
@@ -35,7 +35,7 @@ class AutoProduct(BaseModel):
     description: str
 
     def toString(self):
-        s = "{ " + self.product_id + ", " + self.name + ", " + self.unit_price + ", " + self.stock_quantity + ", " + self.description + " }"
+        s = f"{ {self.product_id}, {self.name}, {self.unit_price}, {self.stock_quantity} , {self.description} }"
         return s
 
 
@@ -46,21 +46,33 @@ def read_root():
 
 @app.get("/getSingleProduct/{item_id}")
 def get_single_product(item_id: str):
-    ys = collection.find_one({"product_id" : item_id})
-    x = json.loads(json_util.dumps((ys), indent=4))
-
-    return x
-
+    try:
+        ys = collection.find_one({"product_id": item_id})
+        if ys:
+            return json.loads(json_util.dumps(ys, indent=4))
+        else:
+            return {"error": "Product not found"}
+    except Exception as e:
+        return {"error": str(e)}
+    
+    
 @app.get("/getAll")
 def get_all_products():
+    try:
+        ys = collection.find({})
+        if ys: 
+            return json.loads(json_util.dumps(list(ys), indent=4))
+        else:
+            return {"error": "No products found"}
+    except Exception as e:
+        return {"error": str(e)}
     
-    ys = collection.find({})
-    x = json.loads(json_util.dumps(list(ys), indent=4))
 
-    return x
- 
+    
 @app.post("/addNew")
 def add_new_item(new_product :AutoProduct ):
+
+    #print(new_product.description())
 
     x = {    "product_id"        : new_product.product_id 
          ,   "name"              : new_product.name
@@ -69,84 +81,118 @@ def add_new_item(new_product :AutoProduct ):
          ,   "description"       : new_product.description  
         }
     
-    y = collection.insert_one(x)
-    
-    x1 = json.loads(json_util.dumps(y), indent=4)
+    try:
+        y = collection.insert_one(x)
+        x1 = json.loads(json_util.dumps(y, indent=4))
+        return x1
+    except Exception as e:
+        return {"error": str(e)}
 
-    return x1 
 
-@app.get("/deleteOne")
+
+@app.delete("/deleteOne/{product_id}")
 def delete_one_item(product_id: str ):
     x = {    "product_id"        : product_id 
         }
     
-    y = collection.delete_one(x)
+    try:
     
-    return {"Message": y}
-
+        y = collection.delete_one(x)
+        return {"deleted_count": y.deleted_count}
+    except Exception as e:
+        return {"error": str(e)}
 
 
 @app.get("/startsWith/{query__all_startingwith}")
-def starts_with(query__all_startingwith: str ):
-    
-    q = { "name": { "$regex": query__all_startingwith + "\\w+" }} 
-    ys = collection.find(q)
-    x = json.loads(json_util.dumps(list(ys), indent=4))
+def starts_with(query__all_startingwith: str):
+    q = {"name": {"$regex": f"^{query__all_startingwith}", "$options": "i"}}
+    try:
+        ys = collection.find(q)
+        return json.loads(json_util.dumps(list(ys), indent=4))
+    except Exception as e:
+        return {"error": str(e)}
 
-    return x
+
+@app.get("/paginate/{page_number}")
+def paginate(page_number: int):
+    items_per_page = 10
+    skip_count = (page_number - 1) * items_per_page
+    try:
+        ys = collection.find().skip(skip_count).limit(items_per_page)
+        return json.loads(json_util.dumps(list(ys), indent=4))
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.get("/convert/{product_id}")
+def convert_dollar_to_euro(product_id: str):
+    x0 = {"product_id": product_id}
+    try:
+        ys = collection.find_one(x0)
+        x1 = json.loads(json_util.dumps(ys, indent=4))
+        if x1 is not None:
+            x = AutoProduct(**x1)
+            price: float = x.unit_price
+            #response = requests.Request.get("https://api.exchangerate-api.com/v4/latest/USD")
+            if True : #response.status_code == 200:
+                #rates = response.json().get("rates", {})
+                #euro_rate = rates.get("EUR", 0.0)
+                euro = price * 0.91 #euro_rate
+                y = {"unit_price__euro": euro}
+                return y
+            else:
+                return {"error": "Failed to fetch exchange rate"}
+        else:
+            return {"unit_price__euro": -1}
+    except Exception as e:
+        return {"error": str(e) }
+
+'''
 
 @app.get("/paginate/{page_number}")
 def paginate(page_number :int ):
     
     y = collection.count_documents({})
+    if y > 0:
+        item_index_min = (page_number - 1) * 10
+        x = y - item_index_min 
+        item_index_max = (page_number) * 10 if x >= 10  else item_index_min + x
 
-    item_index_min = (page_number - 1) * 10
-    x = y - item_index_min 
-    item_index_max = (page_number) * 10 if x >= 10  else item_index_min + x
-
-    start = item_index_min
-    end = item_index_max
-    
-    q = {
-        "$expr": {
-            "$let": {
-                "vars": {
-                    "product_id_number_int": {
-                        "$convert": {
-                            "input": { "$substr": ["$product_id", 4, -1] },
-                            "to": "int",
-                            "onError": 0,
-                            "onNull": 0
+        start = item_index_min
+        end = item_index_max
+        
+        q = {
+            "$expr": {
+                "$let": {
+                    "vars": {
+                        "product_id_number_int": {
+                            "$convert": {
+                                "input": { "$substr": ["$product_id", 4, -1] },
+                                "to": "int",
+                                "onError": 0,
+                                "onNull": 0
+                            }
                         }
+                    },
+                    "in": {
+                        "$and": [
+                            { "$lte": ["$$product_id_number_int", end] },
+                            { "$gte": ["$$product_id_number_int", start] }
+                        ]
                     }
-                },
-                "in": {
-                    "$and": [
-                        { "$lte": ["$$product_id_number_int", end] },
-                        { "$gte": ["$$product_id_number_int", start] }
-                    ]
                 }
             }
         }
-    }
-               
-     
-    ys = collection.find(q)
-    
-    x = json.loads(json_util.dumps(list(ys), indent=4))
+                
+        
+        ys = collection.find(q)
+        
+        x1 = json.loads(json_util.dumps(list(ys), indent=4))
 
-    return x
+        return x1
+    else :
+        return None
 
-@app.get("/convert/{product_id}")
-def convert_dollar_to_euro(product_id :str ):
 
-    x = collection.find_one({"product_id" : product_id })
-    price = x["unit_price"]
-    euro = price *  0.9234
-    return euro
- 
-
-'''
  {
     "Product ID": "AUTO029",
     "Name": "Transmission Fluid",

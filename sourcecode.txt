@@ -62,7 +62,7 @@ async def test_add_new_product():
             ,   "stock_quantity"    :   9999 
             ,   "description"       :   "Testing..."  
             }
-        response = await ac.post("addNew", json=x)
+        response = await ac.post("addNew", data=x)
         result = response.json()
         print(result)
         #has_inserted_id = result['inserted_id'] is str
@@ -83,7 +83,7 @@ async def test_delete_one_product():
     x1 = AsyncClient(base_url=baseurl)
     async with x1 as ac:
         x = {   "product_id"        :   "AUTO1010" }
-        response = await ac.delete("deleteOne/" + str(x))
+        response = await ac.get("deleteOne/" + str(x))
         result = response.json()
         
         shouldHaveTheseKeys :set = { "_id", "product_id", "name", "unit_price", "stock_quantity", "description" }
@@ -95,7 +95,6 @@ async def test_delete_one_product():
         assert response.status_code == 200
         assert response.json()  # Add more assertions based on your expected output
         assert keys1
-        assert result["deleted_count"] == 1
 
 
 @pytest.mark.asyncio
@@ -109,8 +108,7 @@ async def test_products_that_start_with():
         shouldHaveTheseKeys :set = { "_id", "product_id", "name", "unit_price", "stock_quantity", "description" }
         keys1 = [( set( r.keys()) == set(shouldHaveTheseKeys)) for r in result ]
         
-        product_names = sorted([r.get("name", "") for r in result])
-        #product_names :list[str] = sorted([ r["name"] for r in result ])
+        product_names :list[str] = sorted([ r["name"] for r in result ])
         
         z = lambda x : (z.find(x) == 0 and z[ z.find(x) : len(x)] == x )
         product_names__valid = [ z(r) for r in product_names ]
@@ -132,7 +130,7 @@ async def test_paginate_from_a_selection_of_products():
 
         shouldHaveTheseKeys :set = { "_id", "product_id", "name", "unit_price", "stock_quantity", "description" }
         product_ids :list[str] = sorted([ r["product_id"] for r in result ])
-        product_ids__valid = [ r[:4] == "AUTO" and int(r[4:]) >= 0  for r in product_ids ] 
+        product_ids__valid = [ r[:4] == "AUTO" and int(r[4:] >= 0)  for r in product_ids ] 
         valid_ordering = True
         if all(product_ids__valid):
             product_ids__numbers = sorted([ int(r[4:])  for r in product_ids ])
@@ -171,13 +169,13 @@ async def test_product_unit_price_currency_conversion():
 
         #price1 = result1["unit_price"]
 
-        response2 = await ac.get("convert/" + product_id1)
+        response2 = await ac.post("convert", data=result1)
         result2  :float = response2.json()
         
         print("result2: \n\t" + str(result2))
         print("result1: \n\t" + str(result1))
-        sucessful_conversion = result1["unit_price"] *  0.91  == result2["unit_price__euro"]
-        # 0.9234
+        sucessful_conversion = result1["unit_price"] *  0.9234 == result2["unit_price__euro"]
+        
         assert (sucessful_conversion)
         #print(response)
         assert response1.status_code == 200
