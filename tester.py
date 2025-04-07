@@ -67,9 +67,10 @@ async def test_add_new_product():
         print(result)
         #has_inserted_id = result['inserted_id'] is str
 
+        
         shouldHaveTheseKeys :set = { "_id", "product_id", "name", "unit_price", "stock_quantity", "description" }
         #print(result)
-        keys1 = ( set(result.keys()) == set(shouldHaveTheseKeys))
+        keys1 = ( set(result['product'].keys()) == set(shouldHaveTheseKeys))
 
 
 
@@ -82,20 +83,36 @@ async def test_add_new_product():
 async def test_delete_one_product():
     x1 = AsyncClient(base_url=baseurl)
     async with x1 as ac:
-        x = {   "product_id"        :   "AUTO1010" }
-        response = await ac.delete("deleteOne/" + str(x))
-        result = response.json()
+        x1 = {   "product_id"        :   "AUTO1010"
+            ,   "name"              :   "test1"
+            ,   "unit_price"        :   0.00
+            ,   "stock_quantity"    :   9999 
+            ,   "description"       :   "Testing..."  
+            }
+        response1 = await ac.post("addNew", json=x1)
+        result1 = response1.json()
+        
+        
+        x2 = "AUTO1010"
+        response2 = await ac.delete("deleteOne/" + (x2))
+        result2 = response2.json()
         
         shouldHaveTheseKeys :set = { "_id", "product_id", "name", "unit_price", "stock_quantity", "description" }
         #print(result)
-        keys1 = ( set(result.keys()) == set(shouldHaveTheseKeys))
+        deleted1 = int(result2["deleted_count"]) > 0 and result2["product"] is None and int(result2["product_left"]) == 0
+        #print(result2)
+        #keys1 = ( set(result['product'].keys()) == set(shouldHaveTheseKeys))
 
         
         #print(response)
-        assert response.status_code == 200
-        assert response.json()  # Add more assertions based on your expected output
-        assert keys1
-        assert result["deleted_count"] == 1
+        
+        assert response1.status_code == 200
+        assert response1.json()
+        assert response2.status_code == 200
+        assert response2.json()  # Add more assertions based on your expected output
+        print(result2)
+        print(deleted1)
+        assert deleted1
 
 
 @pytest.mark.asyncio
@@ -112,7 +129,7 @@ async def test_products_that_start_with():
         product_names = sorted([r.get("name", "") for r in result])
         #product_names :list[str] = sorted([ r["name"] for r in result ])
         
-        z = lambda x : (z.find(x) == 0 and z[ z.find(x) : len(x)] == x )
+        z = lambda x1 : (x1.find(x) == 0 and x1[ x1.find(x) : len(x)] == x )
         product_names__valid = [ z(r) for r in product_names ]
 
         #print(response)

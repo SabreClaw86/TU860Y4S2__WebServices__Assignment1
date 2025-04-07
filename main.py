@@ -83,8 +83,9 @@ def add_new_item(new_product :AutoProduct ):
     
     try:
         y = collection.insert_one(x)
-        x1 = json.loads(json_util.dumps(y, indent=4))
-        return x1
+        #x1 = json.loads(json_util.dumps(y, indent=4))
+        y1 = collection.find_one({"_id": y.inserted_id})
+        return {"inserted_id": str(y.inserted_id), "product": json.loads(json_util.dumps(y1, indent=4))} 
     except Exception as e:
         return {"error": str(e)}
 
@@ -96,9 +97,12 @@ def delete_one_item(product_id: str ):
         }
     
     try:
-    
-        y = collection.delete_one(x)
-        return {"deleted_count": y.deleted_count}
+        y = collection.delete_many(x)
+        #y = collection.delete_one(x)
+
+        y1 = collection.find_one(x) 
+        count = collection.count_documents(x)
+        return {"deleted_count": str(y.deleted_count), "product_left": str(count),  "product": json.loads(json_util.dumps(y1, indent=4))} 
     except Exception as e:
         return {"error": str(e)}
 

@@ -13,6 +13,7 @@ Resources:
                 advanced library usage
                     - like extending classes to allow capturing of information available only at specific contexts 
                     - that which required to gain fluency with the tools available    
+                more efficient ways to structure code
             }
 
         About python units using pytest library
