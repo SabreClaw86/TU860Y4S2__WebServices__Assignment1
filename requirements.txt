@@ -10,4 +10,5 @@ pytest-html
 pytest-mock
 pytest-xdist
 pytest-dependency
+pytest-asyncio
 data_to_xml
