@@ -4,3 +4,4 @@ pydantic
 bson
 httpx
 pytest
+pytest-xml
