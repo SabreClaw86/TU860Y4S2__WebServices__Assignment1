@@ -4,6 +4,11 @@ pydantic
 bson
 httpx
 pytest
-pytest-html
 pytest-xml
 pytest-item-dict
+pytest-cov
+pytest-html
+pytest-mock
+pytest-xdist
+pytest-dependency
+data_to_xml
