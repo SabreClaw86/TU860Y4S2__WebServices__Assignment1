@@ -19,7 +19,7 @@ def add_new_item(product_id: str, name: str, unit_price :float, stock_quantity :
     print({"Message": y})
 
 
-with open('auto_products.json', 'r') as file:
+with open('auto_products.json', 'r', encoding="utf-8") as file:
     data = json.load(file)
 
 #ys :list[AutoProduct] = [AutoProduct(**y) for y in data]
