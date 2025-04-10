@@ -1,9 +1,6 @@
 pymongo
-json
-typing
 fastapi
 pydantic
 bson
-json
 httpx
 pytest
