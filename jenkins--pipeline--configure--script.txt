@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+    
+    environment {
+        PYTHONIOENCODING = 'utf-8'
+        PYTHONLEGACYWINDOWSSTDIO = 'utf-8'
+         }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clone the GitHub repository
+                git branch: 'main', url: 'https://github.com/SabreClaw86/TU860Y4S2__WebServices__Assignment1/'
+            }
+        }
+
+        stage('Setup Environment') {
+            steps {
+                // Create and activate virtual environment, then install dependencies
+                bat "C:\\Users\\B00147637\\AppData\\Local\\Programs\\Python\\Python313\\python.exe -m venv venv"
+                bat "venv\\Scripts\\activate"
+                bat "venv\\Scripts\\pip.exe install -r requirements.txt"
+                
+            }
+        }
+
+        
+        stage('Run Tests') {
+            steps {
+                // Run pytest within the virtual environment
+                bat "venv\\Scripts\\activate"
+                bat "venv\\Scripts\\pytest.exe tester.py --html=pytest_results-jenkinsrun.html"
+                
+            }
+        }
+
+    }
+}

@@ -1,0 +1,350 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Fast API Auto Products",
+        "summary": "This is a very custom OpenAPI schema",
+        "description": "Here's a longer description of the custom **OpenAPI** schema",
+        "version": "2.5.0",
+        "x-logo": {
+            "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
+        }
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "Read Root",
+                "operationId": "read_root__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getSingleProduct/{item_id}": {
+            "get": {
+                "summary": "Get Single Product",
+                "operationId": "get_single_product_getSingleProduct__item_id__get",
+                "parameters": [
+                    {
+                        "name": "item_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Item Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getAll": {
+            "get": {
+                "summary": "Get All Products",
+                "operationId": "get_all_products_getAll_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/addNew": {
+            "post": {
+                "summary": "Add New Item",
+                "operationId": "add_new_item_addNew_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AutoProduct"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/deleteOne/{product_id}": {
+            "delete": {
+                "summary": "Delete One Item",
+                "operationId": "delete_one_item_deleteOne__product_id__delete",
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Product Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/startsWith/{query__all_startingwith}": {
+            "get": {
+                "summary": "Starts With",
+                "operationId": "starts_with_startsWith__query__all_startingwith__get",
+                "parameters": [
+                    {
+                        "name": "query__all_startingwith",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Query  All Startingwith"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/paginate/{page_number}": {
+            "get": {
+                "summary": "Paginate",
+                "operationId": "paginate_paginate__page_number__get",
+                "parameters": [
+                    {
+                        "name": "page_number",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Page Number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/convert/{product_id}": {
+            "get": {
+                "summary": "Convert Dollar To Euro",
+                "operationId": "convert_dollar_to_euro_convert__product_id__get",
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Product Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AutoProduct": {
+                "properties": {
+                    "product_id": {
+                        "type": "string",
+                        "title": "Product Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "unit_price": {
+                        "type": "number",
+                        "title": "Unit Price"
+                    },
+                    "stock_quantity": {
+                        "type": "integer",
+                        "title": "Stock Quantity"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "product_id",
+                    "name",
+                    "unit_price",
+                    "stock_quantity",
+                    "description"
+                ],
+                "title": "AutoProduct"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}

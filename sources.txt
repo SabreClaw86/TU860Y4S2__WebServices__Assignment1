@@ -1,3 +1,4 @@
+Resources Utilised 
 
 Member:
     Adam O'Shea     B00147637
@@ -9,12 +10,22 @@ Resources:
     AI :    {   
                 basic examples of library usage, 
                     - that which is required to gain familiarity with the tools available 
-                tracking down errors that hard to spot (either due to unfamilarity or limited attention span)
+                tracking down errors that are hard to spot (either due to unfamilarity or limited attention span)
                 advanced library usage
                     - like extending classes to allow capturing of information available only at specific contexts 
                     - that which required to gain fluency with the tools available    
                 more efficient ways to structure code
             }
 
-        About python units using pytest library
+        About python units using pytest library 
+        Issues using Jenkins like how to structure a pipeline script and unicode 
+            Though it was hit and miss, and had to use my own intuition, like after searching the web and then put the environmental variables in the environment structure in the pipeline script.
 
+    Human: 
+
+        Own Labwork and experience
+            pymongo 
+
+        Others:
+            Environment variables for unicode in python
+                https://sqlpey.com/python/solved-how-to-fix-unicodeencodeerror-charmap-codec-cant-encode-characters/#google_vignette
