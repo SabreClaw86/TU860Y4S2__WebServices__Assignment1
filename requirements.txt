@@ -1,5 +1,5 @@
 pymongo
-fastapi
+fastapi[standard]
 pydantic
 httpx
 pytest
